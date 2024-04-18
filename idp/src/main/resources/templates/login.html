@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IDP Login</title>
+</head>
+<body>
+<h2>IDP Login</h2>
+<form action="/idp/login" method="post" enctype="multipart/form-data">
+    <input id="username" name="username" type="text" placeholder="???"/></br>
+    <input id="password" name="password" type="password" placeholder="??"/></br>
+    <input type="submit" value="??"/>
+    <input id="relayState" name="relayState" type="hidden" th:value="${RelayState}"/>
+</form>
+</body>
+</html>
