@@ -39,7 +39,7 @@ public abstract class CertUtils {
     private static final Logger log = LoggerFactory.getLogger(CertUtils.class);
 
     /**
-     * ????
+     * 生成证书
      */
     public static void generateCert(String privateKeyPath, String publicKeyPath, String certPath) {
         try {
@@ -99,9 +99,9 @@ public abstract class CertUtils {
     }
 
     /**
-     * ????
+     * 读取私钥
      *
-     * @return ??
+     * @return 私钥
      */
     public static PrivateKey readPrivateKey(String path) {
         try {
@@ -118,9 +118,9 @@ public abstract class CertUtils {
     }
 
     /**
-     * ????
+     * 读取公钥
      *
-     * @return ??
+     * @return 公钥
      */
     public static PublicKey readPublicKey(String path) {
         try {
@@ -137,9 +137,9 @@ public abstract class CertUtils {
     }
 
     /**
-     * ????
+     * 读取证书
      *
-     * @return ??
+     * @return 证书
      */
     public static X509Certificate readCert(String path) {
         try {
@@ -154,19 +154,19 @@ public abstract class CertUtils {
     }
 
     /**
-     * ??????
+     * 获取证书凭证
      *
-     * @param certPath ????
-     * @return ??
+     * @param certPath 证书路径
+     * @return 凭证
      */
     public static Credential getCertCredential(String certPath) {
         return new BasicX509Credential(CertUtils.readCert(certPath));
     }
 
     /**
-     * ??????
+     * 获取私钥凭证
      *
-     * @return ??
+     * @return 凭证
      */
     public static Credential getKeyCredential(String publicKeyPath, String privateKeyPath) {
         return new BasicCredential(CertUtils.readPublicKey(publicKeyPath),
