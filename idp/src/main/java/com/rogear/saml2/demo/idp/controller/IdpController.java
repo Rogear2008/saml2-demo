@@ -26,9 +26,11 @@ public class IdpController {
     private IdpService idpService;
 
     /**
-     * ?????
+     * 打开登录页
      *
-     * @return ???
+     * @param RelayState relayState
+     * @param model      模型
+     * @return 登录页
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(String RelayState, Model model) {
@@ -37,12 +39,12 @@ public class IdpController {
     }
 
     /**
-     * ??
+     * 登录
      *
-     * @param loginDto ????
-     * @param request  http??
-     * @param response http??
-     * @return
+     * @param loginDto 登录对象
+     * @param request  请求
+     * @param response 响应
+     * @return 跳转地址
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
@@ -50,11 +52,11 @@ public class IdpController {
     }
 
     /**
-     * ????
+     * 主页
      *
-     * @param model   ??
-     * @param request http??
-     * @return
+     * @param model   模型
+     * @param request 请求
+     * @return 跳转地址
      */
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     public String index(Model model, HttpServletRequest request) {

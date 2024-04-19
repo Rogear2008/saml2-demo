@@ -73,14 +73,14 @@ public class IdpSamlServiceImpl implements IdpSamlService {
 
     static {
         try {
-            // ???opensaml
+            // 初始化opensaml
             InitializationService.initialize();
         } catch (InitializationException e) {
             log.warn("Init saml error", e);
             throw new RuntimeException(e);
         }
 
-        // ????
+        // 生成证书
         File file = new File(IDP_CERT_PATH);
         if (!file.exists()) {
             CertUtils.generateCert(IDP_PRIVATE_KEY_PATH, IDP_PUBLIC_KEY_PATH, IDP_CERT_PATH);
@@ -110,40 +110,41 @@ public class IdpSamlServiceImpl implements IdpSamlService {
             String simpleCertStr = certStr.replaceAll("\n", "")
                     .replace("-----BEGIN CERTIFICATE-----", "")
                     .replace("-----END CERTIFICATE-----", "");
-            // ??
+
+            // 签名
             KeyDescriptor signKeyDescriptor = SamlUtils.createKeyDescriptor(simpleCertStr, UsageType.SIGNING);
             idpSsoDescriptor.getKeyDescriptors().add(signKeyDescriptor);
 
-            // ??
+            // 加密
             KeyDescriptor encryptDescriptor = SamlUtils.createKeyDescriptor(simpleCertStr, UsageType.ENCRYPTION);
             idpSsoDescriptor.getKeyDescriptors().add(encryptDescriptor);
 
-            // redirect sso ????????
+            // redirect方式单点登录服务
             SingleSignOnService redirectSsoService = SamlUtils.createSingleSignOnService(
                     IDP_SSO_REDIRECT_URL, SAMLConstants.SAML2_REDIRECT_BINDING_URI);
             idpSsoDescriptor.getSingleSignOnServices().add(redirectSsoService);
 
-            // post sso Post??????
+            // post方式单点登录服务
             SingleSignOnService postSsoService = SamlUtils.createSingleSignOnService(
                     IDP_SSO_POST_URL, SAMLConstants.SAML2_POST_BINDING_URI);
             idpSsoDescriptor.getSingleSignOnServices().add(postSsoService);
 
-            // redirect slo ????????
+            // redirect方式单点登出服务
             SingleLogoutService redirectSloService = SamlUtils.createSingleLogoutService(
                     IDP_SLO_REDIRECT_URL, SAMLConstants.SAML2_REDIRECT_BINDING_URI);
             idpSsoDescriptor.getSingleLogoutServices().add(redirectSloService);
 
-            // post slo Post??????
+            // post方式单点登出服务
             SingleLogoutService postSloService = SamlUtils.createSingleLogoutService(
                     IDP_SLO_POST_URL, SAMLConstants.SAML2_POST_BINDING_URI);
             idpSsoDescriptor.getSingleLogoutServices().add(postSloService);
 
             idpEntityDescriptor.getRoleDescriptors().add(idpSsoDescriptor);
 
-            // ???xml
+            // 转换成xml
             String idpMetadata = SamlUtils.entityToXml(idpEntityDescriptor);
 
-            // ?????
+            // 记录到文件
             FileWriter fileWriter = new FileWriter(IDP_METADATA_PATH);
             fileWriter.write(idpMetadata);
             fileWriter.flush();
@@ -156,15 +157,15 @@ public class IdpSamlServiceImpl implements IdpSamlService {
 
     @Override
     public String ssoRedirect(String samlRequest, String relayState, String signature, String sigAlg, HttpServletRequest request) {
-        // ??????session?
         HttpSession session = request.getSession();
+        // 设置标识，需要单点登录到sp
         session.setAttribute(SSO_TO_SP, true);
         log.info("samlRequest: " + samlRequest);
         log.info("relayState: " + relayState);
         log.info("signature: " + signature);
         log.info("sigAlg: " + sigAlg);
         try {
-            // ??
+            // 验签
             validateSamlRequest(samlRequest, relayState, signature, sigAlg);
 
             HTTPRedirectDeflateDecoder decoder = new HTTPRedirectDeflateDecoder();
@@ -176,14 +177,14 @@ public class IdpSamlServiceImpl implements IdpSamlService {
             String authnRequestStr = SamlUtils.entityToXml(authnRequest);
             log.info("authnRequest: \n" + authnRequestStr);
 
-            // ??????opensaml??? ?????
+            // 也可以不适用opensaml，自己解析
             getAuthnRequest(samlRequest);
 
-            // ???AuthnRequest???????????????????????????sso?
+            // 从AuthnRequest中获取参数，处理业务逻辑，比如记录是谁在发起单点登录
             Issuer issuer = authnRequest.getIssuer();
             log.info("issuer: " + issuer.getValue());
 
-            // ??????????
+            // 跳转到登录页进行登录
             return "redirect:/idp/login";
         } catch (Exception e) {
             log.warn("Sso redirect error", e);
@@ -192,20 +193,21 @@ public class IdpSamlServiceImpl implements IdpSamlService {
     }
 
     /**
-     * ??
+     * 验签
      *
-     * @param samlRequest saml??
+     * @param samlRequest saml请求
      * @param relayState  relayState
-     * @param signature   ??
-     * @param sigAlg      ????
+     * @param signature   签名
+     * @param sigAlg      算法
      */
     private void validateSamlRequest(String samlRequest, String relayState, String signature, String sigAlg) {
-        // ????????
+        // authRequest是可以不签名的，主要看IDP和SP如何约定
         if (StringUtils.isEmpty(signature)) {
             log.info("Signature is empty");
             return;
         }
         try {
+            // 加密的查询参数
             String query = "SAMLRequest=" + URLEncoder.encode(samlRequest, "UTF-8") + "&RelayState="
                     + URLEncoder.encode(relayState, "UTF-8") + "&SigAlg="
                     + URLEncoder.encode(sigAlg, "UTF-8");
@@ -217,12 +219,14 @@ public class IdpSamlServiceImpl implements IdpSamlService {
             } else if (SignatureConstants.ALGO_ID_SIGNATURE_DSA_SHA1.equals(sigAlg)) {
                 sig = java.security.Signature.getInstance("SHA1withDSA");
             } else {
+                log.warn("Unknown signature algorithm: " + sigAlg);
                 throw new RuntimeException("Unknown signature algorithm: " + sigAlg);
             }
             X509Certificate x509Certificate = CertUtils.readCert(SP_CERT_PATH);
             sig.initVerify(x509Certificate.getPublicKey());
             sig.update(query.getBytes());
             if (!sig.verify(signatureBytes)) {
+                log.warn("Signature is not valid");
                 throw new RuntimeException("Signature is not valid");
             }
         } catch (Exception e) {
@@ -232,14 +236,13 @@ public class IdpSamlServiceImpl implements IdpSamlService {
     }
 
     private AuthnRequest getAuthnRequest(String samlRequest) throws IOException, ParserConfigurationException, SAXException, UnmarshallingException, MarshallingException, TransformerException {
-        // Base64 ?? SAMLRequest
+        // Base64解码SAMLRequest
         byte[] samlRequestDecodedBytes = Base64.getDecoder().decode(samlRequest);
 
-        // ?? Inflater (???ZIP??)
+        // 解压缩
         Inflater inflater = new Inflater(true);
         InflaterInputStream inflaterInputStream = new InflaterInputStream(new ByteArrayInputStream(samlRequestDecodedBytes), inflater);
 
-        // ?InflaterInputStream?????????
         ByteArrayOutputStream decodedRequestOS = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int bytesRead;

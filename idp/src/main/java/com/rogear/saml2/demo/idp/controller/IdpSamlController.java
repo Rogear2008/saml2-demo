@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import static com.rogear.saml2.demo.common.Constants.METADATA;
 import static com.rogear.saml2.demo.common.Constants.RELAY_STATE;
+
 /**
  * @author Rogear2008
  * @since 4/18/24
@@ -25,9 +26,9 @@ public class IdpSamlController {
     private IdpSamlService idpSamlService;
 
     /**
-     * ??IDP???
+     * 获取IDP元数据
      *
-     * @return IDP???
+     * @return IDP元数据
      */
     @RequestMapping(value = "/metadata", method = RequestMethod.GET)
     public String getIdpMetadata(HttpServletRequest request) {
@@ -37,17 +38,17 @@ public class IdpSamlController {
     }
 
     /**
-     * Redirect???sso????
+     * Redirect方式单点登录地址
      *
-     * @param SAMLRequest saml????????????????
-     * @param RelayState  relayState??????????????
-     * @param request     http??
-     * @return sso???
+     * @param SAMLRequest saml请求
+     * @param RelayState  relayState
+     * @param request     请求
+     * @return 跳转地址
      */
     @GetMapping("/sso/redirect")
     public String ssoRedirect(String SAMLRequest, String RelayState, String Signature, String SigAlg,
                               HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        // saml??????????????
+        // saml参数还可以如下方式获取
 //        String samlRequest = request.getParameter("SAMLRequest");
 //        String relayState = request.getParameter("RelayState");
         redirectAttributes.addAttribute(RELAY_STATE, RelayState);
@@ -55,12 +56,12 @@ public class IdpSamlController {
     }
 
     /**
-     * Redirect???slo????
+     * Redirect方式但点多登出地址
      *
-     * @param SAMLRequest saml????????????????
-     * @param RelayState  relayState??????????????
-     * @param request     http??
-     * @return slo???
+     * @param SAMLRequest saml请求
+     * @param RelayState  relayState
+     * @param request     请求
+     * @return 跳转地址
      */
     @GetMapping("/slo/redirect")
     public void sloRedirect(String SAMLRequest, String RelayState, String Signature, String SigAlg,
@@ -69,11 +70,10 @@ public class IdpSamlController {
     }
 
     /**
-     * ?????SP
+     * 单点登录到SP
      *
-     * @param request  http??
-     * @param response http??
-     * @return
+     * @param request  请求
+     * @param response 响应
      */
     @RequestMapping(value = "sso_to_sp", method = RequestMethod.GET)
     public void ssoToSp(HttpServletRequest request, HttpServletResponse response) {
