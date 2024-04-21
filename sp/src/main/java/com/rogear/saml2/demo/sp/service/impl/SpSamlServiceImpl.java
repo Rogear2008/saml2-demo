@@ -59,14 +59,14 @@ public class SpSamlServiceImpl implements SpSamlService {
 
     static {
         try {
-            // ???
+            // 初始化
             InitializationService.initialize();
         } catch (InitializationException e) {
             log.warn("Init saml error", e);
             throw new RuntimeException(e);
         }
 
-        // ????
+        // 生成证书
         File file = new File(SP_CERT_PATH);
         if (!file.exists()) {
             CertUtils.generateCert(SP_PRIVATE_KEY_PATH, SP_PUBLIC_KEY_PATH, SP_CERT_PATH);
@@ -76,7 +76,7 @@ public class SpSamlServiceImpl implements SpSamlService {
     @Override
     public String getSpMetadata() {
         try {
-            // ????
+            // 读取证书
             FileReader fileReader = new FileReader(SP_CERT_PATH);
             String certStr = "";
             BufferedReader reader = new BufferedReader(fileReader);
@@ -85,7 +85,7 @@ public class SpSamlServiceImpl implements SpSamlService {
                 certStr += line;
             }
 
-            // ??metadata
+            // 构建metadata
             EntityDescriptor spEntityDescriptor = new EntityDescriptorBuilder().buildObject();
             spEntityDescriptor.setEntityID(SP_ENTITY_ID);
 
@@ -97,21 +97,21 @@ public class SpSamlServiceImpl implements SpSamlService {
             String simpleCertStr = certStr.replaceAll("\n", "")
                     .replace("-----BEGIN CERTIFICATE-----", "")
                     .replace("-----END CERTIFICATE-----", "");
-            // ??
+            // 签名
             KeyDescriptor signKeyDescriptor = SamlUtils.createKeyDescriptor(simpleCertStr, UsageType.SIGNING);
             spSsoDescriptor.getKeyDescriptors().add(signKeyDescriptor);
 
-            // ??
+            // 加密
             KeyDescriptor encryptDescriptor = SamlUtils.createKeyDescriptor(simpleCertStr, UsageType.ENCRYPTION);
             spSsoDescriptor.getKeyDescriptors().add(encryptDescriptor);
 
-            // redirect acs ??????
+            // redirect方式断言消费服务
             AssertionConsumerService redirectAcsService = new AssertionConsumerServiceBuilder().buildObject();
             redirectAcsService.setLocation(SP_ACS_REDIRECT_URL);
             redirectAcsService.setBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
             spSsoDescriptor.getAssertionConsumerServices().add(redirectAcsService);
 
-            // post acs ??????
+            // post方式断言消费服务
             AssertionConsumerService postAcsService = new AssertionConsumerServiceBuilder().buildObject();
             postAcsService.setLocation(SP_ACS_POST_URL);
             postAcsService.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
@@ -119,10 +119,10 @@ public class SpSamlServiceImpl implements SpSamlService {
 
             spEntityDescriptor.getRoleDescriptors().add(spSsoDescriptor);
 
-            // ???xml
+            // 转换成xml
             String spMetadata = SamlUtils.entityToXml(spEntityDescriptor);
 
-            // ?????
+            // 记录到文件
             FileWriter fileWriter = new FileWriter(SP_METADATA_PATH);
             fileWriter.write(spMetadata);
             fileWriter.flush();
@@ -133,20 +133,16 @@ public class SpSamlServiceImpl implements SpSamlService {
         }
     }
 
-    /**
-     * ?idp??????
-     * @param response ??
-     */
     @Override
     public void ssoToIdp(HttpServletResponse response) {
         try {
-            // ??AuthnRequest
+            // 构建AuthnRequest
             AuthnRequest authnRequest = buildAuthnRequest();
 
-            // ???????
+            // 构建消息上下文
             MessageContext messageContext = SamlUtils.buildMessageContext(SAMLConstants.SAML2_REDIRECT_BINDING_URI, IDP_SSO_REDIRECT_URL);
             messageContext.setMessage(authnRequest);
-            // ??relayState
+            // 设置relayState
             messageContext.getSubcontext(SAMLBindingContext.class, true).setRelayState(RELAY_STATE);
 
             // ??
@@ -171,12 +167,6 @@ public class SpSamlServiceImpl implements SpSamlService {
         }
     }
 
-    /**
-     * ?idp??slo
-     *
-     * @param username ???
-     * @param response response
-     */
     @Override
     public void sloToIdp(String username, HttpServletResponse response) {
         LogoutRequest logoutRequest = buildLogoutRequest(username);
@@ -234,11 +224,11 @@ public class SpSamlServiceImpl implements SpSamlService {
 
     private AuthnRequest buildAuthnRequest() {
         AuthnRequest authnRequest = new AuthnRequestBuilder().buildObject();
-        // ??id
+        // 设置id
         authnRequest.setID(UUID.randomUUID().toString());
-        // ????
+        // 设置签发时间
         authnRequest.setIssueInstant(new DateTime());
-        // ????
+        // 设置绑定
         authnRequest.setProtocolBinding(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
         // ??????
         authnRequest.setAssertionConsumerServiceURL(SP_ACS_POST_URL);
@@ -281,7 +271,7 @@ public class SpSamlServiceImpl implements SpSamlService {
             MessageContext<SAMLObject> messageContext = decoder.getMessageContext();
             Response samlResponse = (Response) messageContext.getMessage();
 
-            // ??
+            // 验签
             validateSignature(samlResponse);
 
             // ????????
@@ -295,7 +285,7 @@ public class SpSamlServiceImpl implements SpSamlService {
                 throw new IllegalArgumentException("Assertion is not valid yet");
             }
 
-            // ?????
+            // 签发者
             Issuer issuer = assertion.getIssuer();
             if (!issuer.getValue().equals(IDP_ENTITY_ID)) {
                 throw new IllegalArgumentException("Assertion issuer is not valid");
@@ -303,10 +293,10 @@ public class SpSamlServiceImpl implements SpSamlService {
 
             NameID nameID = assertion.getSubject().getNameID();
             log.info("SSO username: " + nameID.getValue());
-            // ??????
+            // 设置登录态
             request.getSession().setAttribute(LOGIN_USERNAME, nameID.getValue());
 
-            // ???xml
+            // 转换成xml
             String samlResponseStr = SamlUtils.entityToXml(samlResponse);
             log.info("SAMLResponse?\n" + samlResponseStr);
 
@@ -318,7 +308,7 @@ public class SpSamlServiceImpl implements SpSamlService {
     }
 
     /**
-     * ??
+     * 验签
      *
      * @param samlResponse samlResponse
      */

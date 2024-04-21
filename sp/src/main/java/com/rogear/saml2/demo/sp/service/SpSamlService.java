@@ -12,14 +12,14 @@ import javax.servlet.http.HttpServletResponse;
 public interface SpSamlService {
 
     /**
-     * ??sp????
+     * 获取sp元数据
      *
-     * @return sp????
+     * @return sp元数据
      */
     String getSpMetadata();
 
     /**
-     * ACS POST??
+     * POST方式断言消费
      *
      * @param ssoDto  ssoDto
      * @param request request
@@ -28,14 +28,14 @@ public interface SpSamlService {
     String acsPost(SsoDto ssoDto, HttpServletRequest request);
 
     /**
-     * ?idp??sso
+     * 向idp发起单点登录
      *
      * @param response response
      */
     void ssoToIdp(HttpServletResponse response);
 
     /**
-     * ?idp??slo
+     * 向idp发起单点登出
      *
      * @param username ???
      * @param response response
@@ -43,13 +43,13 @@ public interface SpSamlService {
     void sloToIdp(String username, HttpServletResponse response);
 
     /**
-     * Redirect???slo????
+     * Redirect方式单点登出
      *
-     * @param samlRequest saml??
+     * @param samlRequest saml请求
      * @param relayState  relayState
-     * @param signature   ??
-     * @param sigAlg      ????
-     * @param request     http??
+     * @param signature   签名
+     * @param sigAlg      签名算法
+     * @param request     http请求
      */
     void sloRedirect(String samlRequest, String relayState, String signature, String sigAlg, HttpServletRequest request);
 }

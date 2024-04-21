@@ -12,28 +12,28 @@ import javax.servlet.http.HttpServletResponse;
 public interface SpService {
 
     /**
-     * ????
+     * 进入主页
      *
-     * @param request  ??
-     * @param response ??
-     * @return ??
+     * @param request  请求
+     * @param response 响应
+     * @return 跳转地址
      */
     String index(HttpServletRequest request, HttpServletResponse response);
 
     /**
-     * ??
+     * 登出
      *
-     * @param request ??
-     * @return ??
+     * @param request 请求
+     * @return 跳转地址
      */
     String logout(HttpServletRequest request, HttpServletResponse response);
 
     /**
-     * ??
+     * 登录
      *
-     * @param loginDto ????
-     * @param request  http??
-     * @param response http??
+     * @param loginDto 登录对象
+     * @param request  http请求
+     * @param response http响应
      * @return
      */
     String login(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);

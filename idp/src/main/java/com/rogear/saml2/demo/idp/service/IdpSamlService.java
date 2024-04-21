@@ -10,43 +10,42 @@ import javax.servlet.http.HttpServletResponse;
 public interface IdpSamlService {
 
     /**
-     * ??IDP???
+     * 获取IDP元数据
      *
-     * @return IDP???
+     * @return IDP元数据
      */
     String getIdpMetadata();
 
     /**
-     * Redirect???sso
+     * Redirect方式单点登录
      *
-     * @param samlRequest saml??
+     * @param samlRequest saml请求
      * @param relayState  relayState
-     * @param signature   ??
-     * @param sigAlg      ????
-     * @param request     http??
-     * @return sso???
+     * @param signature   签名
+     * @param sigAlg      签名算法
+     * @param request     http请求
+     * @return 跳转地址
      */
     String ssoRedirect(String samlRequest, String relayState, String signature, String sigAlg, HttpServletRequest request);
 
     /**
-     * sso?sp
+     * sso到sp
      *
      * @param relayState relayState
-     * @param request    http??
-     * @param response   http??
-     * @return
+     * @param request    http请求
+     * @param response   http响应
      */
     void ssoToSp(String relayState, HttpServletRequest request, HttpServletResponse response);
 
     /**
-     * slo
+     * 单点登出
      *
-     * @param samlRequest saml??
+     * @param samlRequest saml请求
      * @param relayState  relayState
-     * @param signature   ??
-     * @param sigAlg      ????
-     * @param request     http??
-     * @param response    http??
+     * @param signature   签名
+     * @param sigAlg      签名算法
+     * @param request     http请求
+     * @param response    http响应
      */
     void sloRedirect(String samlRequest, String relayState, String signature, String sigAlg, HttpServletRequest request, HttpServletResponse response);
 

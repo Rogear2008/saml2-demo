@@ -25,9 +25,9 @@ public class SpSamlController {
     private SpSamlService spSamlService;
 
     /**
-     * ??SP???
+     * 获取SP元数据
      *
-     * @return SP???
+     * @return SP元数据
      */
     @RequestMapping(value = "/metadata", method = RequestMethod.GET)
     public String getSpMetadata(HttpServletRequest request) {
@@ -37,10 +37,10 @@ public class SpSamlController {
     }
 
     /**
-     * ACS POST??
+     * POST方式的断言消费
      *
-     * @param ssoDto  ??????
-     * @param request ??
+     * @param ssoDto  单点登录对象
+     * @param request 请求
      * @return
      */
     @RequestMapping(value = "/acs/post", method = RequestMethod.POST)
@@ -49,13 +49,13 @@ public class SpSamlController {
     }
 
     /**
-     * Redirect???slo????
+     * Redirect方式单点登出
      *
-     * @param SAMLRequest saml??
+     * @param SAMLRequest saml请求
      * @param RelayState  relayState
-     * @param Signature   ??
-     * @param SigAlg      ????
-     * @param request     http??
+     * @param Signature   签名
+     * @param SigAlg      签名算法
+     * @param request     http请求
      * @return
      */
     @RequestMapping(value = "/slo/redirect", method = RequestMethod.GET)

@@ -90,7 +90,7 @@ public class IdpSamlServiceImpl implements IdpSamlService {
     @Override
     public String getIdpMetadata() {
         try {
-            // ????
+            // 读取证书
             FileReader fileReader = new FileReader(IDP_CERT_PATH);
             String certStr = "";
             BufferedReader reader = new BufferedReader(fileReader);
@@ -99,7 +99,7 @@ public class IdpSamlServiceImpl implements IdpSamlService {
                 certStr += line;
             }
 
-            // ??metadata
+            // 构建metadata
             EntityDescriptor idpEntityDescriptor = new EntityDescriptorBuilder().buildObject();
             idpEntityDescriptor.setEntityID(IDP_ENTITY_ID);
 

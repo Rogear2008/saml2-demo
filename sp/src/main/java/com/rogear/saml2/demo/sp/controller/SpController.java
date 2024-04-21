@@ -22,11 +22,11 @@ public class SpController {
     private SpService spService;
 
     /**
-     * ????
+     * 进入主页
      *
-     * @param request  ??
-     * @param response ??
-     * @return ??
+     * @param request  请求
+     * @param response 响应
+     * @return 跳转地址
      */
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     public String index(HttpServletRequest request, HttpServletResponse response) {
@@ -34,9 +34,9 @@ public class SpController {
     }
 
     /**
-     * ?????
+     * 打开登录页
      *
-     * @return ???
+     * @return 跳转地址
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login() {
@@ -44,11 +44,11 @@ public class SpController {
     }
 
     /**
-     * ??
+     * 登录
      *
-     * @param loginDto ????
-     * @param request  http??
-     * @param response http??
+     * @param loginDto 登录对象
+     * @param request  http请求
+     * @param response http响应
      * @return
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -57,10 +57,10 @@ public class SpController {
     }
 
     /**
-     * ??
+     * 登出
      *
-     * @param request ??
-     * @return ??
+     * @param request 请求
+     * @return 跳转地址
      */
     @RequestMapping(value = "logout", method = RequestMethod.GET)
     public String logout(HttpServletRequest request, HttpServletResponse response) {

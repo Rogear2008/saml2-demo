@@ -12,11 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 public interface IdpService {
 
     /**
-     * ??
+     * 登录
      *
-     * @param loginDto ????
-     * @param request  http??
-     * @param response http??
+     * @param loginDto 登录对象
+     * @param request  http请求
+     * @param response http响应
      * @return
      */
     String login(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);
